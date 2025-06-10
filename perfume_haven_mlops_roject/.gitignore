@@ -1,2 +1,4 @@
-perfume/
-*.csv
+pvenv/
+notebooks/perfumes_table.csv
+perfumes_table.csv
+notebooks/
