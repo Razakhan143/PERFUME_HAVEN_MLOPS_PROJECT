@@ -7,7 +7,7 @@ src.egg-info/
 __pycache__/
 *.py[cod]
 *$py.class
-
+projectflow.txt
 # C extensions
 *.so
 .environments
