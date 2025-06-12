@@ -1,0 +1,105 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: python src/data/data_ingestion.py
+    deps:
+    - path: src/data/data_ingestion.py
+      hash: md5
+      md5: 3a2134ed84eecb715c27f18c6c82cd6b
+      size: 3191
+    params:
+      params.yaml:
+        data_ingestion.data_size: 1000
+    outs:
+    - path: data/raw
+      hash: md5
+      md5: d20233cb54cc33ff51a8e813e642e3dc.dir
+      size: 563302
+      nfiles: 1
+  data_preprocessing:
+    cmd: python src/data/data_preprocessing.py
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: d20233cb54cc33ff51a8e813e642e3dc.dir
+      size: 563302
+      nfiles: 1
+    - path: src/data/data_preprocessing.py
+      hash: md5
+      md5: 87fb9623f36452248872df647e8c7319
+      size: 2697
+    outs:
+    - path: data/interim
+      hash: md5
+      md5: c67cd4fe4a1ef8b156a5407597900601.dir
+      size: 1031621
+      nfiles: 1
+  feature_engineering:
+    cmd: python src/features/feature_engineering.py
+    deps:
+    - path: data/interim
+      hash: md5
+      md5: c67cd4fe4a1ef8b156a5407597900601.dir
+      size: 1031621
+      nfiles: 1
+    - path: src/features/feature_engineering.py
+      hash: md5
+      md5: b2ba98f7899680cd8fa280e0c599b693
+      size: 4035
+    params:
+      params.yaml:
+        feature_engineering.max_features: 5000
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 4b31e0e80f6ce190deccc7fe2ea76ea6.dir
+      size: 205551
+      nfiles: 1
+  model_building:
+    cmd: python src/model/model_building.py
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 4b31e0e80f6ce190deccc7fe2ea76ea6.dir
+      size: 205551
+      nfiles: 1
+    - path: src/model/model_building.py
+      hash: md5
+      md5: 832eb5f3d9cac8ba29ecf17ffe09efa3
+      size: 2795
+    outs:
+    - path: model/cosine_similarity.pkl
+      hash: md5
+      md5: 1b63e6028d1d022544424d5fe4af711c
+      size: 8000596
+  model_evaluation:
+    cmd: python src/model/model_evaluation.py
+    deps:
+    - path: model/cosine_similarity.pkl
+      hash: md5
+      md5: 1b63e6028d1d022544424d5fe4af711c
+      size: 8000596
+    - path: src/model/model_evaluation.py
+      hash: md5
+      md5: c9c9e0322e4925eb729e6ff0b1e57e03
+      size: 9233
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: 821a85a8722973c338cc2146c0c4b31c
+      size: 1577
+    - path: reports/model_info.json
+      hash: md5
+      md5: 5c4e0a4da9b325db0c8604e6ca0972ce
+      size: 104
+  model_registration:
+    cmd: python src/model/register_model.py
+    deps:
+    - path: reports/model_info.json
+      hash: md5
+      md5: 5c4e0a4da9b325db0c8604e6ca0972ce
+      size: 104
+    - path: src/model/register_model.py
+      hash: md5
+      md5: 2dbeb02c49d819934f30a25dc33c45c5
+      size: 3232

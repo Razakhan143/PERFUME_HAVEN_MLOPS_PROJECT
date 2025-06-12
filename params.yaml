@@ -1,0 +1,6 @@
+# params.yaml
+data_ingestion:
+  data_size: 1000
+
+feature_engineering:
+  max_features: 5000
