@@ -138,12 +138,6 @@ def main():
             # Log the recommended perfumes to MLflow
             mlflow.log_param("recommended_perfumes", json.dumps(metrics['recommended_perfumes']))
             logging.info('Recommended perfumes logged to MLflow')
-            # Log the model to MLflow
-            mlflow.sklearn.log_model(clf, "cosine_similarity_model")
-            logging.info('Model logged to MLflow')
-            # Log the model run ID to MLflow
-            mlflow.log_param("run_id", run.info.run_id)
-            logging.info('Run ID logged to MLflow')
             # Log the model type to MLflow
             mlflow.log_param("model_type", "cosine_similarity")
             logging.info('Model type logged to MLflow')
