@@ -34,13 +34,11 @@ stages:
     deps:
     - data/processed
     - src/model/model_building.py
-    outs:
-    - model/cosine_similarity.pkl
+    
 
   model_evaluation:
     cmd: python src/model/model_evaluation.py
     deps:
-    - model/cosine_similarity.pkl
     - src/model/model_evaluation.py
     metrics:
     - reports/metrics.json
