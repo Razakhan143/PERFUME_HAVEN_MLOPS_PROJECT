@@ -76,7 +76,7 @@ def main():
 
         df = load_data('notebooks/perfumes_dataset.csv')
 
-      
+      #aws keys will be written in the src/connections/s3_connection.py file
 
 
         final_df = preprocess_data(df)
