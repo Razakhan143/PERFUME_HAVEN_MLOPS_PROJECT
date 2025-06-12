@@ -1,7 +1,5 @@
 pvenv/
-notebooks/perfumes_table.csv
-perfumes_table.csv
-notebooks/
+
 src.egg-info/
 # Byte-compiled / optimized / DLL files
 __pycache__/

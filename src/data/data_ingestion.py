@@ -74,7 +74,7 @@ def main():
         params = load_params(params_path='params.yaml')
         data_size = params['data_ingestion']['data_size']
 
-        # df = load_data('notebooks/perfumes_dataset.csv')
+        df = load_data('notebooks/perfumes_dataset.csv')
 
 
 
