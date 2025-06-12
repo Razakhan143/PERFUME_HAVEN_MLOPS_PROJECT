@@ -175,5 +175,5 @@ zipp==3.19.2
 prometheus_client
 fastapi
 pydantic
-
+uvicorn
 -e .
