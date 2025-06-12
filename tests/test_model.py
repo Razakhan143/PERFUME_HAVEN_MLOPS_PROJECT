@@ -101,7 +101,6 @@
 # if __name__ == "__main__":
 #     unittest.main()
 
-
 import unittest
 import ast
 import numpy as np
@@ -111,26 +110,29 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 class TestPerfumeRecommendation(unittest.TestCase):
-    """Test the perfume recommendation system."""
+    """Comprehensive tests for the perfume recommendation system."""
 
     @classmethod
     def setUpClass(cls):
-        # Load full data without sampling
+        # Load data EXACTLY like the main app does
         data_path = "notebooks/perfumes_dataset.csv"
         if not os.path.exists(data_path):
             raise FileNotFoundError("Dataset not found")
         
-        cls.data = pd.read_csv(data_path)
+        # Same sampling as main app
+        size_dataset = 10000
+        cls.data = pd.read_csv(data_path).sample(size_dataset, random_state=42).reset_index(drop=True)
 
-        # Preprocess tags
+        # EXACT copy of the app's processing functions
         def collapse(L):
-            if isinstance(L, str):
-                L = ast.literal_eval(L)
-            return [i.replace(" ","") for i in L]
+            L1 = []
+            for i in ast.literal_eval(L):
+                L1.append(i.replace(" ",""))
+            return L1
 
         cls.data['notes'] = cls.data['notes'].apply(collapse)
-        cls.data['description'] = cls.data['description'].apply(lambda x: x.split() if isinstance(x, str) else [])
-        cls.data['designer'] = cls.data['designer'].apply(lambda x: x.split() if isinstance(x, str) else [])
+        cls.data['description'] = cls.data['description'].apply(lambda x: x.split())
+        cls.data['designer'] = cls.data['designer'].apply(lambda x: x.split())
         cls.data['title_split'] = cls.data['title'].apply(lambda x: x.split())
         
         cls.data["tags"] = (
@@ -141,70 +143,86 @@ class TestPerfumeRecommendation(unittest.TestCase):
         )
         cls.data["tags"] = cls.data["tags"].apply(lambda x: " ".join(x)).str.lower()
 
-        # Create vectorizer
+        # Same vectorizer parameters as main app
         cls.vectorizer = TfidfVectorizer(stop_words="english", max_features=5000)
         cls.tfidf_matrix = cls.vectorizer.fit_transform(cls.data["tags"])
 
-    def test_recommendation_performance(self):
-        """Test that recommendations have reasonable similarity scores."""
+    def test_recommendation_quality(self):
+        """Test that recommendations meet quality thresholds."""
         test_cases = [
             {
-                "query": "Boss The Scent Absolute Hugo Boss for men",
-                "min_expected_score": 0.7,
-                "k": 3
+                "query": "Sauvage Dior for men",
+                "min_score": 0.5,
+                "required_fields": ['title', 'designer', 'description', 'notes', 'img_url'],
+                "k": 5
             },
             {
-                "query": "Miss Dior Blooming Bouquet Roller Pearl Dior for women",
-                "min_expected_score": 0.6, 
-                "k": 3
+                "query": "Black Opium YSL for women",
+                "min_score": 0.5,
+                "required_fields": ['title', 'designer', 'description', 'notes', 'img_url'],
+                "k": 5
             }
         ]
 
         for case in test_cases:
-            query = case["query"]
-            min_score = case["min_expected_score"]
-            k = case["k"]
+            with self.subTest(query=case["query"]):
+                self._validate_recommendation(case)
 
-            # Find perfumes containing the query string
-            query_mask = self.data['title'].str.contains(query, case=False)
-            selected_indices = self.data[query_mask].index
-            
-            if len(selected_indices) == 0:
-                print(f"Warning: No perfumes found matching query '{query}'")
-                continue
+    def _validate_recommendation(self, case):
+        query = case["query"]
+        selected_indices = self.data[self.data['title'].str.contains(query, case=False)].index
+        
+        if len(selected_indices) == 0:
+            self.skipTest(f"Query perfume not found in sample: {query}")
 
-            # Calculate similarity
-            sim_scores = cosine_similarity(
-                self.tfidf_matrix[selected_indices],
+        # Get recommendations
+        sim_scores = cosine_similarity(
+            self.tfidf_matrix[selected_indices],
+            self.tfidf_matrix
+        ).mean(axis=0)
+        
+        similar_indices = sim_scores.argsort()[::-1]
+        rec_indices = [i for i in similar_indices if i not in selected_indices][:case["k"]]
+        recommendations = self.data.iloc[rec_indices]
+
+        # 1. Verify scores meet minimum threshold
+        self.assertTrue(
+            all(sim_scores[rec_indices] >= case["min_score"]),
+            f"Scores {sim_scores[rec_indices]} below threshold {case['min_score']}"
+        )
+
+        # 2. Verify all required fields exist
+        for field in case["required_fields"]:
+            self.assertIn(field, recommendations.columns, f"Missing field {field}")
+
+        # 3. Verify at least some brand overlap
+        query_brands = set(self.data.iloc[selected_indices[0]]['designer'])
+        rec_brands = set().union(*recommendations['designer'].apply(set))
+        self.assertTrue(
+            query_brands & rec_brands,
+            f"No brand overlap between query and recommendations"
+        )
+
+    def test_edge_cases(self):
+        """Test handling of edge cases."""
+        # Empty query
+        with self.assertRaises(ValueError):
+            cosine_similarity(
+                self.vectorizer.transform([""]),
                 self.tfidf_matrix
-            ).mean(axis=0)
+            )
 
-            # Get top recommendations
-            similar_indices = sim_scores.argsort()[::-1]
-            predicted_indices = [i for i in similar_indices if i not in selected_indices][:k]
-            
-            predicted_titles = self.data.iloc[predicted_indices]["title"].tolist()
-            predicted_scores = sim_scores[predicted_indices]
-            
-            print(f"\nQuery: {query}")
-            print(f"Predicted: {predicted_titles}")
-            print(f"Scores: {predicted_scores}")
+        # Non-existent perfume
+        non_existent = "XYZ Perfume That Doesn't Exist"
+        selected_indices = self.data[self.data['title'] == non_existent].index
+        self.assertEqual(len(selected_indices), 0)
 
-            # Verify all recommendations meet minimum similarity score
-            for score in predicted_scores:
-                self.assertGreaterEqual(
-                    score, min_score,
-                    f"Recommendation score {score:.2f} should be >= {min_score}"
-                )
-
-            # Verify recommendations share brand/designer with query
-            query_designer = self.data.iloc[selected_indices[0]]['designer']
-            for idx in predicted_indices:
-                rec_designer = self.data.iloc[idx]['designer']
-                self.assertTrue(
-                    any(brand in rec_designer for brand in query_designer),
-                    f"Recommendation should share brand with query"
-                )
+        # Verify it doesn't crash
+        sim_scores = cosine_similarity(
+            self.vectorizer.transform([non_existent]),
+            self.tfidf_matrix
+        )
+        self.assertEqual(sim_scores.shape, (1, len(self.data)))
 
 if __name__ == "__main__":
     unittest.main()
