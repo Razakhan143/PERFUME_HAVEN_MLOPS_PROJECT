@@ -53,4 +53,4 @@ class FastAPIAppTests(unittest.TestCase):
         self.assertIn("suggestions", response.json())
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main() 
