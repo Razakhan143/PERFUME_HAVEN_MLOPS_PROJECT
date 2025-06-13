@@ -149,25 +149,25 @@ app = FastAPI()
 # MLflow and DagsHub setup
 # -------------------------------------------------------------------------------------
 # Set up DagsHub credentials for MLflow tracking
-dagshub_token = os.getenv("CAPSTONE_TEST")
-if not dagshub_token:
-    raise EnvironmentError("CAPSTONE_TEST environment variable is not set")
+# dagshub_token = os.getenv("CAPSTONE_TEST")
+# if not dagshub_token:
+#     raise EnvironmentError("CAPSTONE_TEST environment variable is not set")
 
-os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
-os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+# os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+# os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 
-dagshub_url = "https://dagshub.com"
-repo_owner = "Razakhan143"
-repo_name = "PERFUME_HAVEN_MLOPS_PROJECT"
-# Set up MLflow tracking URI
-mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
+# dagshub_url = "https://dagshub.com"
+# repo_owner = "Razakhan143"
+# repo_name = "PERFUME_HAVEN_MLOPS_PROJECT"
+# # Set up MLflow tracking URI
+# mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
 # -------------------------------------------------------------------------------------
 # Below code block is for local use
 # -------------------------------------------------------------------------------------
-# MLFLOW_TRACKING_URI = "https://dagshub.com/Razakhan143/PERFUME_HAVEN_MLOPS_PROJECT.mlflow"
-# dagshub.init(repo_owner="Razakhan143", repo_name="PERFUME_HAVEN_MLOPS_PROJECT", mlflow=True)
-# mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-# mlflow.set_experiment("capstone-trial")
+MLFLOW_TRACKING_URI = "https://dagshub.com/Razakhan143/PERFUME_HAVEN_MLOPS_PROJECT.mlflow"
+dagshub.init(repo_owner="Razakhan143", repo_name="PERFUME_HAVEN_MLOPS_PROJECT", mlflow=True)
+mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+mlflow.set_experiment("capstone-trial")
 # -------------------------------------------------------------------------------------
 # Prometheus metrics setup
 registry = CollectorRegistry()
@@ -191,7 +191,7 @@ app.add_middleware(
 )
 
 # Serve static files from /static (for assets like CSS, images)
-static_dir = Path("/static")
+static_dir = Path("perfume_haven/static")
 
 # Verify path exists (for debugging)
 print(f"Static files directory exists: {static_dir.exists()}")
@@ -203,7 +203,7 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 async def read_index():
     REQUEST_COUNT.labels(method="GET", endpoint="/").inc()
     start_time = time.time()
-    response = FileResponse("templates/index.html")
+    response = FileResponse("perfume_haven/templates/index.html")
     REQUEST_LATENCY.labels(endpoint="/").observe(time.time() - start_time)
     return response
 
@@ -212,7 +212,7 @@ async def read_index():
 async def read_search_results():
     REQUEST_COUNT.labels(method="GET", endpoint="/search-results.html").inc()
     start_time = time.time()
-    response = FileResponse("templates/search-results.html")
+    response = FileResponse("perfume_haven/templates/search-results.html")
     REQUEST_LATENCY.labels(endpoint="/search-results.html").observe(time.time() - start_time)
     return response
 
