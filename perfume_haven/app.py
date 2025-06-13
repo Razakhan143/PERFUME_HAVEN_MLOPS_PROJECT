@@ -191,7 +191,7 @@ app.add_middleware(
 )
 
 # Serve static files from /static (for assets like CSS, images)
-static_dir = Path("/app/static")
+static_dir = Path("/static")
 
 # Verify path exists (for debugging)
 print(f"Static files directory exists: {static_dir.exists()}")
