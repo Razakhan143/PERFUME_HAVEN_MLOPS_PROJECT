@@ -14,5 +14,8 @@ RUN ls -la /app/perfume_haven/static
 RUN pip install -r requirements.txt
 
 EXPOSE 5000
+# for local use
+# CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5000", "--reload", "--log-level", "debug"]
 
+# for production use
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "120", "-k", "uvicorn.workers.UvicornWorker", "app:app"]

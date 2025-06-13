@@ -138,6 +138,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 import mlflow
 import dagshub
 import os
@@ -220,7 +222,7 @@ async def read_search_results():
 class SearchRequest(BaseModel):
     query: str
 
-size_dataset = 10000  # Default size of the dataset to sample
+size_dataset = 5000  # Default size of the dataset to sample
 # Perfume data randomly sampled from the dataset
 perfume_data = pd.read_csv("notebooks/perfumes_dataset.csv")
 perfume_data = perfume_data.sample(size_dataset, random_state=42).reset_index(drop=True)
@@ -249,9 +251,6 @@ def create_tags(perfumes):
 
 # Preprocess the perfume data by vectorizing the tags and creating a cosine similarity matrix
 def vectorize_cosine_similarity(perfumes,max_features=1000):
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.metrics.pairwise import cosine_similarity
-
     vectorizer = TfidfVectorizer(stop_words = 'english', max_features=max_features)
     tfidf_matrix = vectorizer.fit_transform(perfumes['tags'])
     cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
@@ -327,4 +326,10 @@ async def metrics():
     return generate_latest(registry), 200, {"Content-Type": CONTENT_TYPE_LATEST}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+    uvicorn.run(
+        "app:app",  # Replace with actual filename (without `.py`)
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 5000)),
+        reload=True,               # Auto-reloads on code changes
+        log_level="debug",         # Ensures detailed logs
+    )
