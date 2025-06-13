@@ -294,34 +294,31 @@ async def get_suggestions(query: str):
 async def search_perfumes(request: SearchRequest):
     REQUEST_COUNT.labels(method="POST", endpoint="/search").inc()
     start_time = time.time()
-    try:
-        if not request.query:
-            raise HTTPException(status_code=400, detail="Query cannot be empty")
 
-        #max_features
-        max_features = 5000
-        print(f"Vectorizing perfume data with max features {max_features}...")
-        # number of recommendations
-        n_recommendations = 10
-        print(f"Number of recommendations to return: {n_recommendations}")
+    if not request.query:
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
 
-        perfumes = create_tags(pd.DataFrame(perfume_data))
-        cosine_sim = vectorize_cosine_similarity(perfumes, max_features=max_features)
-        print("Perfume data loaded and preprocessed successfully.")
-        recommended_perfumes = recommend_perfumes(perfumes, [request.query], cosine_sim, n=n_recommendations)
-        print(f"Search query: {request.query}")
+    #max_features
+    max_features = 5000
+    print(f"Vectorizing perfume data with max features {max_features}...")
+    # number of recommendations
+    n_recommendations = 10
+    print(f"Number of recommendations to return: {n_recommendations}")
+
+    perfumes = create_tags(pd.DataFrame(perfume_data))
+    cosine_sim = vectorize_cosine_similarity(perfumes, max_features=max_features)
+    print("Perfume data loaded and preprocessed successfully.")
+    recommended_perfumes = recommend_perfumes(perfumes, [request.query], cosine_sim, n=n_recommendations)
+    print(f"Search query: {request.query}")
+
+    if recommended_perfumes.empty:
+        raise HTTPException(status_code=404, detail="No perfumes found matching the query")
     
-        if recommended_perfumes.empty:
-            raise HTTPException(status_code=404, detail="No perfumes found matching the query")
-        
-        print(recommended_perfumes[:5])  # Print first 5 results for debugging
-        response = {"results": recommended_perfumes.to_dict(orient="records")}
-        
-        REQUEST_LATENCY.labels(endpoint="/search").observe(time.time() - start_time)
-        return response
-    except Exception as e:
-        print(f"Search error: {str(e)}")  # Debug log
-        raise HTTPException(status_code=500, detail=str(e))
+    print(recommended_perfumes[:5])  # Print first 5 results for debugging
+    response = {"results": recommended_perfumes.to_dict(orient="records")}
+    
+    REQUEST_LATENCY.labels(endpoint="/search").observe(time.time() - start_time)
+    return response
 
 # Metrics endpoint for Prometheus
 @app.get("/metrics")
