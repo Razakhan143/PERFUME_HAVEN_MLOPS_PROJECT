@@ -607,7 +607,7 @@
         const searchInput = document.getElementById('searchInput');
         const searchSuggestions = document.getElementById('searchSuggestions');
         const searchButton = document.getElementById('searchButton');
-
+        const BASE_URL = window.location.origin;
         console.log('index.html loaded');
         console.log('searchInput:', searchInput);
         console.log('searchButton:', searchButton);
@@ -632,7 +632,7 @@
                 return;
             }
             try {
-                const response = await fetch(`http://localhost:8000/suggestions?query=${encodeURIComponent(query)}`);
+                const response = await fetch(`${BASE_URL}/suggestions?query=${encodeURIComponent(query)}`);
                 if (!response.ok) {
                     throw new Error(`Suggestions request failed: ${response.status}`);
                 }

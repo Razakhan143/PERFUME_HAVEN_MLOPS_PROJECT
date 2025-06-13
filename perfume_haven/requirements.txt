@@ -4,7 +4,7 @@ mlflow_skinny==2.19.0
 numpy==2.2.1
 pandas==2.2.3
 prometheus_client
-
+gunicorn==20.1.0
 fastapi==0.110.1
 uvicorn[standard]==0.29.0
 scikit-learn==1.4.2

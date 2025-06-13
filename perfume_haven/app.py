@@ -124,6 +124,11 @@
 
 # if __name__ == "__main__":
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+
+
+
 import ast
 import uvicorn
 import pandas as pd
@@ -138,7 +143,7 @@ import dagshub
 import os
 from prometheus_client import Counter, Histogram, generate_latest, CollectorRegistry, CONTENT_TYPE_LATEST
 import time
-
+from pathlib import Path
 app = FastAPI()
 
 # MLflow and DagsHub setup
@@ -186,14 +191,19 @@ app.add_middleware(
 )
 
 # Serve static files from /static (for assets like CSS, images)
-app.mount("/static", StaticFiles(directory="perfume_haven/static"), name="static")
+static_dir = Path("/app/static")
+
+# Verify path exists (for debugging)
+print(f"Static files directory exists: {static_dir.exists()}")
+print(f"Contents: {list(static_dir.glob('*'))}")
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # Serve index.html at root
 @app.get("/")
 async def read_index():
     REQUEST_COUNT.labels(method="GET", endpoint="/").inc()
     start_time = time.time()
-    response = FileResponse("perfume_haven/templates/index.html")
+    response = FileResponse("templates/index.html")
     REQUEST_LATENCY.labels(endpoint="/").observe(time.time() - start_time)
     return response
 
@@ -202,7 +212,7 @@ async def read_index():
 async def read_search_results():
     REQUEST_COUNT.labels(method="GET", endpoint="/search-results.html").inc()
     start_time = time.time()
-    response = FileResponse("perfume_haven/templates/search-results.html")
+    response = FileResponse("templates/search-results.html")
     REQUEST_LATENCY.labels(endpoint="/search-results.html").observe(time.time() - start_time)
     return response
 
@@ -284,31 +294,34 @@ async def get_suggestions(query: str):
 async def search_perfumes(request: SearchRequest):
     REQUEST_COUNT.labels(method="POST", endpoint="/search").inc()
     start_time = time.time()
-    
-    if not request.query:
-        raise HTTPException(status_code=400, detail="Query cannot be empty")
+    try:
+        if not request.query:
+            raise HTTPException(status_code=400, detail="Query cannot be empty")
 
-    #max_features
-    max_features = 5000
-    print(f"Vectorizing perfume data with max features {max_features}...")
-    # number of recommendations
-    n_recommendations = 10
-    print(f"Number of recommendations to return: {n_recommendations}")
+        #max_features
+        max_features = 5000
+        print(f"Vectorizing perfume data with max features {max_features}...")
+        # number of recommendations
+        n_recommendations = 10
+        print(f"Number of recommendations to return: {n_recommendations}")
 
-    perfumes = create_tags(pd.DataFrame(perfume_data))
-    cosine_sim = vectorize_cosine_similarity(perfumes, max_features=max_features)
-    print("Perfume data loaded and preprocessed successfully.")
-    recommended_perfumes = recommend_perfumes(perfumes, [request.query], cosine_sim, n=n_recommendations)
-    print(f"Search query: {request.query}")
-   
-    if recommended_perfumes.empty:
-        raise HTTPException(status_code=404, detail="No perfumes found matching the query")
+        perfumes = create_tags(pd.DataFrame(perfume_data))
+        cosine_sim = vectorize_cosine_similarity(perfumes, max_features=max_features)
+        print("Perfume data loaded and preprocessed successfully.")
+        recommended_perfumes = recommend_perfumes(perfumes, [request.query], cosine_sim, n=n_recommendations)
+        print(f"Search query: {request.query}")
     
-    print(recommended_perfumes[:5])  # Print first 5 results for debugging
-    response = {"results": recommended_perfumes.to_dict(orient="records")}
-    
-    REQUEST_LATENCY.labels(endpoint="/search").observe(time.time() - start_time)
-    return response
+        if recommended_perfumes.empty:
+            raise HTTPException(status_code=404, detail="No perfumes found matching the query")
+        
+        print(recommended_perfumes[:5])  # Print first 5 results for debugging
+        response = {"results": recommended_perfumes.to_dict(orient="records")}
+        
+        REQUEST_LATENCY.labels(endpoint="/search").observe(time.time() - start_time)
+        return response
+    except Exception as e:
+        print(f"Search error: {str(e)}")  # Debug log
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Metrics endpoint for Prometheus
 @app.get("/metrics")
@@ -317,4 +330,4 @@ async def metrics():
     return generate_latest(registry), 200, {"Content-Type": CONTENT_TYPE_LATEST}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
