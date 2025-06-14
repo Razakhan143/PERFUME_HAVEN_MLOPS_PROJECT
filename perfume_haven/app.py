@@ -423,9 +423,7 @@ try:
     REQUEST_LATENCY = Histogram(
         "app_request_latency_seconds", "Latency of requests in seconds", ["endpoint"], registry=registry
     )
-    PREDICTION_COUNT = Counter(
-        "model_prediction_count", "Count of predictions for each class", ["prediction"], registry=registry
-    )
+
     logger.info("Prometheus metrics configured")
 except Exception as e:
     log_error(e, {"stage": "Prometheus setup"})
@@ -638,8 +636,10 @@ async def search_perfumes(request: SearchRequest):
 @app.get("/metrics")
 async def metrics():
     try:
-        logger.info("Serving metrics endpoint")
-        return generate_latest(registry), 200, {"Content-Type": CONTENT_TYPE_LATEST}
+        logger.info("Generating metrics")
+        data = generate_latest(registry)
+        logger.info(f"Metrics data: {data.decode('utf-8')}")
+        return data, 200, {"Content-Type": CONTENT_TYPE_LATEST}
     except Exception as e:
         log_error(e, {"endpoint": "/metrics"})
         raise HTTPException(status_code=500, detail="Internal server error")
