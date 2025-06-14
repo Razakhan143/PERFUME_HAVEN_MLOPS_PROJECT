@@ -224,8 +224,12 @@ class SearchRequest(BaseModel):
 
 size_dataset = 500  # Default size of the dataset to sample
 # Perfume data randomly sampled from the dataset
-perfume_data = pd.read_csv("notebooks/perfumes_dataset.csv")
-perfume_data = perfume_data.sample(size_dataset, random_state=42).reset_index(drop=True)
+# Load only essential columns to reduce memory
+perfume_data = pd.read_csv(
+    "notebooks/perfumes_dataset.csv",
+    usecols=['title', 'designer', 'description', 'notes', 'img_url']
+).sample(size_dataset, random_state=42).reset_index(drop=True)
+
 
 # Function to collapse notes into a list of strings
 def collapse(L):
