@@ -21,10 +21,10 @@ spec:
         - containerPort: 5000
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "250m"
+            memory: "1Gi"
+            cpu: "500m"
           limits:
-            memory: "512Mi"
+            memory: "2Gi"
             cpu: "1"
         env:
         - name: CAPSTONE_TEST
