@@ -350,7 +350,7 @@
 
 
 
-
+from fastapi import Response
 
 import ast
 import uvicorn
@@ -633,16 +633,18 @@ async def search_perfumes(request: SearchRequest):
             "n_recommendations": n_recommendations
         })
 
+
 @app.get("/metrics")
 async def metrics():
     try:
         logger.info("Generating metrics")
         data = generate_latest(registry)
-        logger.info(f"Metrics data: {data.decode('utf-8')}")
-        return data, 200, {"Content-Type": CONTENT_TYPE_LATEST}
+        return Response(content=data, media_type=CONTENT_TYPE_LATEST)
     except Exception as e:
         log_error(e, {"endpoint": "/metrics"})
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
 
 if __name__ == "__main__":
     try:
