@@ -18,4 +18,13 @@ EXPOSE 5000
 # CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5000", "--reload", "--log-level", "debug"]
 
 # for production use
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "120", "-k", "uvicorn.workers.UvicornWorker", "app:app"]
+# CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "120", "-k", "uvicorn.workers.UvicornWorker", "app:app"]
+
+CMD ["gunicorn", \
+    "--bind", "0.0.0.0:5000", \
+    "--worker-class", "uvicorn.workers.UvicornWorker", \
+    "--timeout", "120", \
+    "--access-logfile", "-", \
+    "--error-logfile", "-", \
+    "--log-level", "debug", \
+    "app:app"]

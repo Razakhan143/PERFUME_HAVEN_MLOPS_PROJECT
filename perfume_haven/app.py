@@ -222,7 +222,7 @@ async def read_search_results():
 class SearchRequest(BaseModel):
     query: str
 
-size_dataset = 5000  # Default size of the dataset to sample
+size_dataset = 500  # Default size of the dataset to sample
 # Perfume data randomly sampled from the dataset
 perfume_data = pd.read_csv("notebooks/perfumes_dataset.csv")
 perfume_data = perfume_data.sample(size_dataset, random_state=42).reset_index(drop=True)
