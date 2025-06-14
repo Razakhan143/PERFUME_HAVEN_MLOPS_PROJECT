@@ -222,12 +222,11 @@ async def read_search_results():
 class SearchRequest(BaseModel):
     query: str
 
-size_dataset = 500  # Default size of the dataset to sample
-# Perfume data randomly sampled from the dataset
-# Load only essential columns to reduce memory
+size_dataset = 500
 perfume_data = pd.read_csv(
     "notebooks/perfumes_dataset.csv",
-    usecols=['title', 'designer', 'description', 'notes', 'img_url']
+    usecols=['title', 'designer', 'description', 'notes', 'img_url'],
+    nrows=500  # Only reads first 500 rows
 ).sample(size_dataset, random_state=42).reset_index(drop=True)
 
 
