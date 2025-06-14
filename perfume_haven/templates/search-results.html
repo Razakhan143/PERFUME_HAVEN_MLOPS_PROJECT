@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -629,6 +629,650 @@
                     `).join('')}
                 </div>
             `;
+        }
+    </script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - Scent & Memoire</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4a2c2a;
+            --secondary: #f5e6cc;
+            --accent: #d4a017;
+            --light: #fff8f0;
+            --dark: #2f1b1a;
+            --error: #e63946;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--dark);
+            background-color: var(--light);
+            line-height: 1.6;
+        }
+        
+        header {
+            background-color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            color: var(--accent);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        
+        .tagline {
+            text-align: center;
+            font-size: 16px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 15px 0;
+            border-top: 1px solid var(--secondary);
+            border-bottom: 1px solid var(--secondary);
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 15px;
+            text-transform: uppercase;
+            transition: color 0.3s, transform 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+        
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin: 40px 0;
+            position: relative;
+        }
+        
+        .search-box {
+            width: 50%;
+            padding: 15px 25px;
+            border: 2px solid var(--secondary);
+            border-radius: 40px 0 0 40px;
+            font-size: 16px;
+            outline: none;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.4s;
+        }
+        
+        .search-box:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(212, 160, 23, 0.3);
+        }
+        
+        .search-button {
+            padding: 15px 25px;
+            border: 2px solid var(--secondary);
+            border-left: none;
+            border-radius: 0 40px 40px 0;
+            background-color: var(--accent);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s;
+        }
+        
+        .search-button:hover {
+            background-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 20%;
+            width: 60%;
+            background: white;
+            border: 1px solid var(--secondary);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .search-suggestions.show {
+            display: block;
+        }
+        
+        .suggestion-item {
+            padding: 12px 25px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .suggestion-item:hover {
+            background-color: var(--light);
+            color: var(--accent);
+        }
+        
+        .search-results {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+            min-height: 300px;
+        }
+        
+        .search-header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--secondary);
+        }
+        
+        .search-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .search-count {
+            color: var(--dark);
+            font-size: 14px;
+        }
+        
+        .search-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .search-item {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.4s, box-shadow 0.4s;
+        }
+        
+        .search-item:hover {
+            transform: translateY(-7px);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.15);
+        }
+        
+        .search-item img {
+            border-radius: 8px;
+            max-width: 150px;
+            height: 150px;
+            object-fit: cover;
+        }
+        
+        .search-item-content {
+            flex: 1;
+        }
+        
+        .search-item-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+            margin: 0 0 5px 0;
+        }
+        
+        .search-item-brand {
+            color: var(--dark);
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        
+        .search-item-details {
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            line-clamp: 5;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            position: relative;
+            font-size: 14px;
+        }
+
+        .search-item-details.expanded {
+            -webkit-line-clamp: unset;
+            line-clamp: unset;
+            overflow: visible;
+        }
+
+        .read-more-btn {
+            color: var(--accent);
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 5px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .search-item-notes {
+            color: var(--primary);
+            font-style: italic;
+            font-size: 13px;
+            margin: 5px 0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: var(--accent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 30px;
+            font-size: 16px;
+            color: var(--error);
+            background: #fff0f0;
+            border-radius: 8px;
+            border-left: 4px solid var(--error);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: var(--primary);
+            font-size: 18px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(212, 160, 23, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        footer {
+            background-color: var(--primary);
+            color: white;
+            padding: 40px 0;
+            margin-top: 60px;
+        }
+        
+        .footer-content {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        footer h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        footer p, footer input, footer button {
+            font-size: 14px;
+        }
+        
+        footer input {
+            padding: 10px;
+            border: 1px solid var(--secondary);
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        footer button {
+            padding: 10px 20px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-left: 5px;
+        }
+        
+        footer a {
+            margin: 0 10px;
+        }
+        
+        .social-icons img {
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Scent & Memoire</div>
+        <div class="tagline">Sent that Travel's to the Soul</div>
+        
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="#">All Brands</a>
+            <a href="#">Men</a>
+            <a href="#">Women</a>
+            <a href="#">Unisex</a>
+            <a href="#">Niche</a>
+            <a href="#">Gift Sets</a>
+            <a href="#">Miniatures</a>
+        </nav>
+        
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="Explore our fragrance collection..." id="searchInput">
+            <button class="search-button" id="searchButton">Search</button>
+            <div class="search-suggestions" id="searchSuggestions"></div>
+        </div>
+    </header>
+    
+    <section class="search-results" id="searchResults">
+        <!-- Content will be dynamically loaded here -->
+    </section>
+    
+    <footer>
+        <div class="footer-content">
+            <div>
+                <h3>Top Brands</h3>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li>About Us</li>
+                    <li>Contact Us</li>
+                    <li>FAQ's</li>
+                    <li>Blogs / News</li>
+                    <li>Privacy Policy</li>
+                    <li>Terms & Conditions</li>
+                    <li>Shipping Charges</li>
+                    <li>Return Policy</li>
+                    <li>Refund Policy</li>
+                </ul>
+            </div>
+            <div>
+                <h3>Home</h3>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li>All Brands</li>
+                    <li>Men</li>
+                    <li>Women</li>
+                    <li>Unisex</li>
+                    <li>Niche</li>
+                    <li>Gift Sets</li>
+                    <li>Miniatures</li>
+                </ul>
+            </div>
+            <div>
+                <h3>Our Location</h3>
+                <p>Address: 123, Plot 1c, 1st Floor,<br> 5th Commercial Lane, Zamzama,<br> Phase 2, Karachi</p>
+                <p>Phone: 03302956463</p>
+                <p>Email: scent.memoire@gmail.com</p>
+            </div>
+            <div>
+                <h3>Sign Up & Save</h3>
+                <p>Subscribe to get special offers,<br>free giveaways, and exclusive deals.</p>
+                <input type="email" placeholder="Enter your email">
+                <button>Subscribe</button>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="#"><img src="https://img.icons8.com/ios-filled/24/ffffff/facebook.png" alt="Facebook"></a>
+            <a href="#"><img src="https://img.icons8.com/ios-filled/24/ffffff/instagram.png" alt="Instagram"></a>
+        </div>
+        <p style="text-align: center; margin-top: 20px; font-size: 12px;">© 2025 Scent & Memoire - Developed and Managed by RAZA KHAN</p>
+        <p style="text-align: center; font-size: 12px;">03302956463 | scent.memoire@gmail.com</p>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const searchSuggestions = document.getElementById('searchSuggestions');
+        const searchButton = document.getElementById('searchButton');
+        const searchResults = document.getElementById('searchResults');
+        
+        // Configuration
+        const BASE_URL = window.location.origin;
+        const DEBUG_MODE = true; // Set to false in production
+        const DEFAULT_IMAGE = 'https://via.placeholder.com/150?text=No+Image';
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            if (DEBUG_MODE) console.log('DOM fully loaded and parsed');
+            
+            // Test backend connection
+            testBackendConnection().then(connected => {
+                if (!connected) {
+                    showError("Could not connect to the server. Please try again later.");
+                }
+            });
+
+            // Load initial search from URL if present
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialQuery = urlParams.get('query');
+            
+            if (initialQuery) {
+                searchInput.value = decodeURIComponent(initialQuery);
+                performSearch(decodeURIComponent(initialQuery));
+            }
+        });
+
+        // Debounce function for search suggestions
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // Test backend connection
+        async function testBackendConnection() {
+            try {
+                const response = await fetch(`${BASE_URL}/healthz`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                if (DEBUG_MODE) console.log('Backend connection test successful');
+                return true;
+            } catch (error) {
+                console.error('Backend connection failed:', error);
+                return false;
+            }
+        }
+
+        // Fetch search suggestions
+        const fetchSuggestions = debounce(async (query) => {
+            if (!query || query.length < 2) {
+                searchSuggestions.classList.remove('show');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BASE_URL}/suggestions?query=${encodeURIComponent(query)}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const data = await response.json();
+                displaySuggestions(data.suggestions || []);
+            } catch (error) {
+                if (DEBUG_MODE) console.error('Error fetching suggestions:', error);
+                searchSuggestions.classList.remove('show');
+            }
+        }, 300);
+
+        // Display search suggestions
+        function displaySuggestions(suggestions) {
+            if (!suggestions.length) {
+                searchSuggestions.classList.remove('show');
+                return;
+            }
+
+            searchSuggestions.innerHTML = suggestions
+                .map(title => `<div class="suggestion-item">${title}</div>`)
+                .join('');
+            searchSuggestions.classList.add('show');
+        }
+
+        // Event Listeners
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim();
+            if (DEBUG_MODE) console.log('Input changed:', query);
+            fetchSuggestions(query);
+        });
+
+        searchSuggestions.addEventListener('click', (e) => {
+            if (e.target.classList.contains('suggestion-item')) {
+                const query = e.target.textContent;
+                searchInput.value = query;
+                searchSuggestions.classList.remove('show');
+                performSearch(query);
+            }
+        });
+
+        searchButton.addEventListener('click', () => {
+            const query = searchInput.value.trim();
+            if (query) performSearch(query);
+        });
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = searchInput.value.trim();
+                if (query) performSearch(query);
+            }
+        });
+
+        // Main search function
+        async function performSearch(query) {
+            if (!query.trim()) {
+                showError("Please enter a search query");
+                return;
+            }
+
+            showLoading(`Searching for "${query}"...`);
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch(`${BASE_URL}/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        query: query,
+                        debug: DEBUG_MODE
+                    })
+                });
+
+                const duration = Date.now() - startTime;
+                if (DEBUG_MODE) console.log(`Search took ${duration}ms`);
+
+                if (!response.ok) {
+                    const error = await parseError(response);
+                    throw new Error(error);
+                }
+
+                const data = await response.json();
+                if (DEBUG_MODE) console.log('Search results:', data);
+
+                if (!data.results || !data.results.length) {
+                    showNoResults(query);
+                    return;
+                }
+
+                displayResults(data.results, query);
+            } catch (error) {
+                console.error('Search failed:', error);
+                showError(`Search failed: ${error.message}`);
+            }
+        }
+
+        // Helper function to parse error responses
+        async function parseError(response) {
+            try {
+                const errorData = await response.json();
+                return errorData.detail || `Server responded with ${response.status}`;
+            } catch {
+                return `Server responded with ${response.status}`;
+            }
+        }
+
+        // Display loading state
+        function showLoading(message) {
+            searchResults.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    ${message}
+                </div>`;
+        }
+
+        // Display error state
+        function showError(message) {
+            searchResults.innerHTML = `
+                <div class="error">
+                    ${message}
+                    ${DEBUG_MODE ? '<br>Check console for details' : ''}
+                </div>`;
+        }
+
+        // Display no results state
+        function showNoResults(query) {
+            searchResults.innerHTML = `
+                <div class="no-results">
+                    No perfumes found matching "${query}".
+                    <br>Try a different search term.
+                </div>`;
+        }
+
+        // Display search results
+        function displayResults(results, query) {
+            searchResults.innerHTML = `
+                <div class="search-header">
+                    <h2 class="search-title">SEARCH RESULTS</h2>
+                    <div class="search-count">${results.length} perfumes found for "${query}"</div>
+                </div>
+                <div class="search-grid">
+                    ${results.map(perfume => `
+                        <div class="search-item">
+                            <img src="${perfume.img_url || DEFAULT_IMAGE}" 
+                                 alt="${perfume.title}" 
+                                 onerror="this.src='${DEFAULT_IMAGE}'">
+                            <div class="search-item-content">
+                                <h3 class="search-item-title">${perfume.title}</h3>
+                                <p class="search-item-brand">${perfume.designer || 'Unknown Brand'}</p>
+                                ${perfume.notes ? `<p class="search-item-notes">Notes: ${perfume.notes}</p>` : ''}
+                                <p class="search-item-details">
+                                    ${perfume.description || 'No description available'}
+                                </p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>`;
         }
     </script>
 </body>
