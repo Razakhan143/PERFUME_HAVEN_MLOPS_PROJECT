@@ -466,11 +466,11 @@ class SearchRequest(BaseModel):
     query: str
 # Data loading
 try:
-    size_dataset = 500
+    size_dataset = 5000
     perfume_data = pd.read_csv(
         "notebooks/perfumes_dataset.csv",
         usecols=['title', 'designer', 'description', 'notes', 'img_url'],
-        nrows=500
+        nrows=5000
     ).sample(size_dataset, random_state=42).reset_index(drop=True)
     logger.info(f"Successfully loaded {len(perfume_data)} perfume records")
 except Exception as e:

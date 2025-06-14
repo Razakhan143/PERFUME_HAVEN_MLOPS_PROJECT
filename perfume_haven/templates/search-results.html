@@ -1251,28 +1251,31 @@
 
         // Display search results
         function displayResults(results, query) {
+            console.log('Displaying search results:', results);
             searchResults.innerHTML = `
                 <div class="search-header">
                     <h2 class="search-title">SEARCH RESULTS</h2>
-                    <div class="search-count">${results.length} perfumes found for "${query}"</div>
+                    <div class="search-count">${results.length} products found</div>
                 </div>
                 <div class="search-grid">
                     ${results.map(perfume => `
                         <div class="search-item">
-                            <img src="${perfume.img_url || DEFAULT_IMAGE}" 
-                                 alt="${perfume.title}" 
-                                 onerror="this.src='${DEFAULT_IMAGE}'">
+                            <img src="${perfume.img_url || 'https://via.placeholder.com/150'}" 
+                                 alt="${perfume.title}" width="150">
                             <div class="search-item-content">
                                 <h3 class="search-item-title">${perfume.title}</h3>
-                                <p class="search-item-brand">${perfume.designer || 'Unknown Brand'}</p>
-                                ${perfume.notes ? `<p class="search-item-notes">Notes: ${perfume.notes}</p>` : ''}
-                                <p class="search-item-details">
+                                <p class="search-item-brand">${perfume.designer || 'Unknown Designer'}</p>
+                                <p class="search-item-details" id="desc-${perfume.id}">
                                     ${perfume.description || 'No description available'}
                                 </p>
+                                <span class="read-more-btn" id="readMore-${perfume.id}" style="display: none;">Read more</span>
+                                <p class="search-item-rating">${'★'.repeat(perfume.rating || 0)}${'☆'.repeat(5 - (perfume.rating || 0))} (${perfume.reviews || 0} reviews)</p>
+                                <p class="search-item-price">Price: Rs. ${perfume.price ? perfume.price.toLocaleString() : 'N/A'}</p>
                             </div>
                         </div>
                     `).join('')}
-                </div>`;
+                </div>
+            `;
         }
     </script>
 </body>
