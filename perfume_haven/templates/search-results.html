@@ -409,7 +409,15 @@
                 timeout = setTimeout(later, wait);
             };
         }
-
+        const testConnection = async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/health`);
+                console.log("API health status:", await response.text());
+            } catch (error) {
+                console.error("API connection failed:", error);
+            }
+            }
+            testConnection();
         const fetchSuggestions = debounce(async (query) => {
             if (!query) {
                 searchSuggestions.classList.remove('show');

@@ -13,6 +13,9 @@ RUN ls -la /app/perfume_haven/static
 
 RUN pip install -r requirements.txt
 
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -f http://localhost:5000/healthz || exit 1
+
 EXPOSE 5000
 # for local use
 # CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5000", "--reload", "--log-level", "debug"]
