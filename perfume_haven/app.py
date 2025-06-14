@@ -203,6 +203,7 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 # Serve index.html at root
 @app.get("/")
 async def read_index():
+    print("Serving index.html")
     REQUEST_COUNT.labels(method="GET", endpoint="/").inc()
     start_time = time.time()
     response = FileResponse("perfume_haven/templates/index.html")
@@ -281,7 +282,7 @@ def recommend_perfumes(perfumes, selected_perfumes, cosine_sim, n = 10):
 async def get_suggestions(query: str):
     REQUEST_COUNT.labels(method="GET", endpoint="/suggestions").inc()
     start_time = time.time()
-    
+    print(f"Received suggestions request: {query}")
     if not query:
         response = {"suggestions": []}
     else:
@@ -294,6 +295,8 @@ async def get_suggestions(query: str):
 # Search endpoint
 @app.post("/search")
 async def search_perfumes(request: SearchRequest):
+    print(f"Received search request: {request.query}")
+    """Search for perfumes based on the query."""
     REQUEST_COUNT.labels(method="POST", endpoint="/search").inc()
     start_time = time.time()
 
@@ -312,7 +315,7 @@ async def search_perfumes(request: SearchRequest):
     print("Perfume data loaded and preprocessed successfully.")
     recommended_perfumes = recommend_perfumes(perfumes, [request.query], cosine_sim, n=n_recommendations)
     print(f"Search query: {request.query}")
-
+    print(f"Number of recommended perfumes: {len(recommended_perfumes)}")
     if recommended_perfumes.empty:
         raise HTTPException(status_code=404, detail="No perfumes found matching the query")
     
